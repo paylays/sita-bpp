@@ -1,6 +1,10 @@
 sita-bpp/frontend/.gitignore
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# ===================
+# Frontend (React)
+# ===================
+
 # dependencies
 /frontend/node_modules
 /frontend/.pnp
@@ -22,3 +26,25 @@ sita-bpp/frontend/.gitignore
 /frontend/npm-debug.log*
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
+
+# ===================
+# Backend (Express.js)
+# ===================
+
+# Node.js dependencies
+/backend/node_modules
+
+# Environment variables
+/backend/.env
+
+# Logs
+/backend/logs
+/backend/*.log
+
+# Debug
+/.vscode/
+
+# npm debug logs
+/backend/npm-debug.log*
+/backend/yarn-debug.log*
+/backend/yarn-error.log*
