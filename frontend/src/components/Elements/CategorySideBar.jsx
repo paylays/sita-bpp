@@ -53,16 +53,6 @@ class CategorySideBar extends Component {
               <li><NavLink to={"/"}>Balikpapan Kota<span> (90)</span></NavLink></li>
             </ul>
           </div>
-          {/* Kelurahan  */}
-          <div className="widget widget_services ">
-            <h4 className="widget-title">Kelurahan</h4>
-            <ul className="p-a10 bg-white">
-              <li><NavLink to={"/"}>Lamaru<span> (28)</span></NavLink></li>
-              <li><NavLink to={"/"}>Manggar<span> (05)</span></NavLink></li>
-              <li><NavLink to={"/"}>Manggar Baru<span> (24)</span></NavLink></li>
-              <li><NavLink to={"/"}>Teritip<span> (15)</span></NavLink></li>
-            </ul>
-          </div>
         </div>
       </>
     );

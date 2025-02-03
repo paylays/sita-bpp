@@ -28,7 +28,7 @@ app.post('/admin/login', async (req, res) => {
   }
 
   // Jika valid, buat JWT token
-  const token = jwt.sign({ email: ADMIN_EMAIL }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ email: ADMIN_EMAIL }, JWT_SECRET, { expiresIn: '4h' });
   res.json({ token });
 });
 
