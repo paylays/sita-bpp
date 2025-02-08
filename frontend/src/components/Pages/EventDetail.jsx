@@ -52,9 +52,9 @@ class EventDetail extends Component {
                       </div>
                       <div className="sx-post-meta  m-t20">
                         <ul>
-                          <li className="post-date"><strong>20 </strong> <span>Septembar 2022</span> </li>
+                          <li className="post-date"><strong>20 </strong> <span>September 2022</span> </li>
                           <li className="post-author"><NavLink to={"#"}>By <span>Admin</span></NavLink> </li>
-                          <li className="post-category"><NavLink to={"#"}><span>Architecture</span></NavLink> </li>
+                          <li className="post-category"><NavLink to={"#"}><span>Location Event</span></NavLink> </li>
                         </ul>
                       </div>
                       <div className="sx-post-title ">

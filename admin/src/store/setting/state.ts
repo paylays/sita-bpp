@@ -6,7 +6,7 @@ export const initialState: SettingState = {
   "storeKey": "huisetting-react",
   "setting": {
     "app_name": {
-      "value": "Hope UI"
+      "value": "Balikpapan"
     },
     "theme_scheme_direction": {
       "value": "ltr"
