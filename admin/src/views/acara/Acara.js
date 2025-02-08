@@ -387,7 +387,7 @@ const Acara = () => {
                   <img
                     src={dataDetail.gambar_acara}
                     alt="Gambar Acara"
-                    style={{ width: "100%", maxHeight: "500px", objectFit: "cover"}}
+                    style={{ width: "100%", maxHeight: "500px", objectFit: "cover", marginTop: "20px"}}
                   />
                 )}
               </p>

@@ -38,7 +38,7 @@ const Event = sequelize.define('Event', {
     },
     gambar_acara: {  // ➜ Tambahkan kolom gambar_acara
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 }, {
     tableName: 'events',
