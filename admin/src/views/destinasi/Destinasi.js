@@ -60,20 +60,20 @@ const Destinasi = () => {
       ${item.kategori_destinasi}
     </span>`,
     item.nama_destinasi,
-    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.deskripsi_destinasi}</div>`,
+    `<div style="white-space: normal; width: 400px; max-height: 200px; overflow: auto;">${item.deskripsi_destinasi}</div>`,
     `<div style="white-space: normal; width: 400px;">${item.alamat}</div>`,
     item.jam_operasional,
     item.harga_tiket,
-    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.fasilitas}</div>`,
-    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.aktivitas}</div>`,
+    `<div style="white-space: normal; width: 400px; max-height: 200px; overflow: auto;">${item.fasilitas}</div>`,
+    `<div style="white-space: normal; width: 400px; max-height: 200px; overflow: auto;">${item.aktivitas}</div>`,
     `<div style="white-space: normal; width: 300px; max-height: 200px; overflow: auto;">${item.link_gmaps}</div>`,
     item.gambar_destinasi 
     ? `<img src="http://localhost:5000/uploads/${item.gambar_destinasi}" alt="Gambar Destinasi" width="100"/>`
     : "Tidak ada gambar",
     item.link_whatsapp,
-    item.link_instagram,
-    item.link_youtube,
-    item.link_facebook,
+    item.link_instagram || "-",
+    item.link_youtube || "-",
+    item.link_facebook || "-",
   ]);
 
   const DataTableOptions = {

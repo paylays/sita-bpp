@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Row, Col, Form, Button } from 'react-bootstrap';
+import { Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import Card from '../../components/Card';
 import axios from 'axios';
 
@@ -20,6 +20,8 @@ const TambahDestinasi = () => {
     link_youtube: '',
     link_facebook: '',
   });
+  const [showA3, setShowA3] = useState(false);
+  const [validated, setValidated] = useState(false);
 
   const kategoriList = [
     { id: 1, name: 'Wisata Alam' },
@@ -53,7 +55,11 @@ const TambahDestinasi = () => {
 
     if (form.checkValidity() === false) {
       event.stopPropagation();
+      setValidated(true);
+      return;
     }
+
+    setValidated(true);
 
     const data = new FormData();
     data.append("kategori_destinasi", formData.kategori_destinasi);
@@ -98,6 +104,8 @@ const TambahDestinasi = () => {
         link_youtube: '',
         link_facebook: '',
       });
+
+      setShowA3(true);
     } catch (error) {
       console.error('Error saat menambahkan destinasi:', error);
     } 
@@ -116,7 +124,17 @@ const TambahDestinasi = () => {
                     </Card.Header>
                     <Card.Body>
                         <p>Mohon mengisi data destinasi dengan benar.</p>
-                        <Form  onSubmit={handleSubmit}>
+                        {showA3 && (
+                          <Alert
+                            variant="success alert-left alert-dismissible fade show mb-3"
+                            role="alert"
+                            onClose={() => setShowA3(false)}
+                            dismissible
+                          >
+                            <span>Destinasi berhasil ditambahkan!</span>
+                          </Alert>
+                        )}
+                        <Form noValidate validated={validated} onSubmit={handleSubmit}>
                           <Row>
                             <Col md="3" className="mb-3">
                               <Form.Label htmlFor="nama_destinasi">Nama Destinasi</Form.Label>
@@ -250,7 +268,7 @@ const TambahDestinasi = () => {
                               />
                             </Col>
                             <Col md="3" className="mb-3">
-                              <Form.Label htmlFor="link_instagram">Instagram URL</Form.Label>
+                              <Form.Label htmlFor="link_instagram">Instagram URL <span className="text-muted">(Opsional)</span></Form.Label>
                               <Form.Control
                                 type="text"
                                 id="link_instagram"
@@ -260,7 +278,7 @@ const TambahDestinasi = () => {
                               />
                             </Col>
                             <Col md="3" className="mb-3">
-                              <Form.Label htmlFor="link_youtube">Youtube URL</Form.Label>
+                              <Form.Label htmlFor="link_youtube">Youtube URL <span className="text-muted">(Opsional)</span></Form.Label>
                               <Form.Control
                                 type="text"
                                 id="link_youtube"
@@ -270,7 +288,7 @@ const TambahDestinasi = () => {
                               />
                             </Col>
                             <Col md="3" className="mb-3">
-                              <Form.Label htmlFor="link_facebook">Facebook URL</Form.Label>
+                              <Form.Label htmlFor="link_facebook">Facebook URL <span className="text-muted">(Opsional)</span></Form.Label>
                               <Form.Control
                                 type="text"
                                 id="link_facebook"
