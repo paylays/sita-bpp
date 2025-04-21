@@ -10,7 +10,7 @@ const KreasiLokal = () => {
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailId, setSelectedDetailId] = useState("");
-  const [localcreationDetail, setLocalCreationDetail] = useState(null);
+  const [dataDetail, setDataDetail] = useState(null);
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEditId, setSelectedEditId] = useState("");
@@ -34,20 +34,47 @@ const KreasiLokal = () => {
         setLocalCreations([]); 
       });
   }, []);
+
+  const categoryColors = {
+    "Kuliner": "rgba(229, 62, 62, 0.5)", 
+    "Kriya": "rgba(49, 130, 206, 0.5)", 
+    "Fashion": "rgba(56, 161, 105, 0.5)", 
+    "Seni Rupa": "rgba(214, 158, 46, 0.5)", 
+    "Seni Pertunjukan": "rgba(128, 90, 213, 0.5)" 
+  };
+
   
   const tableData = localcreations.map((item) => [
-    item.kategori_ekraf,
+    new Date(item.createdAt).toLocaleString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, 
+    }),
+    `<span class="badge shaped-pill" 
+      style="background-color: ${categoryColors[item.kategori_ekraf] || 'gray'}; color: white;">
+      ${item.kategori_ekraf}
+    </span>`,
     item.nama_ekraf,
-    item.deskripsi_ekraf,
-    item.alamat,
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.deskripsi_ekraf}</div>`,
+    `<div style="white-space: normal; width: 400px;">${item.alamat}</div>`,
     item.jam_operasional,
     item.harga_produk,
     item.no_whatsapp,
-    item.link_gmaps,
+    `<div style="white-space: normal; width: 300px; max-height: 200px; overflow: auto;">${item.link_gmaps}</div>`,
+    item.gambar_kreasilokal 
+    ? `<img src="http://localhost:5000/uploads/${item.gambar_kreasilokal}" alt="Gambar Kreasi Lokal" width="100"/>`
+    : "Tidak ada gambar",
+    item.link_instagram,
+    item.link_youtube,
+    item.link_facebook,
   ]);
 
   const DataTableOptions = {
     columns: [
+      { title: "Tanggal Rilis" },
       { title: "Kategori Kreasi Lokal" },
       { title: "Nama Kreasi Lokal" },
       { title: "Deskripsi" },
@@ -56,6 +83,10 @@ const KreasiLokal = () => {
       { title: "Harga Produk" },
       { title: "No Whatsapp" },
       { title: "Link Gmaps" },
+      { title: "Gambar Kreasi Lokal" },
+      { title: "Instagram URL" },
+      { title: "Youtube URL" },
+      { title: "Facebook URL" },
     ],
     data: tableData,
   };
@@ -68,7 +99,7 @@ const KreasiLokal = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedDetailId("");
-    setLocalCreationDetail(null);
+    setDataDetail(null);
   };
 
   const handleDetailSelectChange = (e) => {
@@ -80,7 +111,13 @@ const KreasiLokal = () => {
     axios
       .get(`http://localhost:5000/api/localcreations/${selectedDetailId}`)
       .then((response) => {
-        setLocalCreationDetail(response.data);
+        const eventData = response.data
+        setDataDetail({
+          ...eventData,
+          gambar_kreasilokal: eventData.gambar_kreasilokal
+            ? `http://localhost:5000/uploads/${eventData.gambar_kreasilokal}`
+            : null,
+        });
       })
       .catch((error) => {
         console.error("Terjadi kesalahan saat mengambil detail kreasi lokal:", error);
@@ -123,32 +160,55 @@ const KreasiLokal = () => {
   };
 
   const handleEditChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
+
     setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
+        ...prevData,
+        [name]: type === "file" ? files[0] : value,
     }));
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedEditId || !editData) return;
 
-    axios
-      .put(`http://localhost:5000/api/localcreations/edit/${selectedEditId}`, editData)
-      .then((response) => {
-        // Update data destinasi pada state jika diperlukan
-        const updatedDest = response.data;
-        setLocalCreations((prevLocalCreations) =>
-          prevLocalCreations.map((dest) =>
-            dest.id === updatedDest.id ? updatedDest : dest
-          )
-        );
-        handleCloseEditModal();
-      })
-      .catch((error) => {
-        console.error("Terjadi kesalahan saat mengedit destinasi:", error);
-      });
+    const formData = new FormData();
+    
+    if (editData.gambar_kreasilokal instanceof File) {
+      formData.append("gambar_kreasilokal", editData.gambar_kreasilokal);
+    }
+
+    Object.keys(editData).forEach((key) => {
+      if (key !== "gambar_kreasilokal") { 
+        formData.append(key, editData[key] || ""); 
+      }
+    });
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/localcreations/edit/${selectedEditId}`, 
+        formData, 
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const updateLocalCreation = response.data;
+
+      setLocalCreations((prevLocalCreations) =>
+        prevLocalCreations.map((localcreation) =>
+          localcreation.id === updateLocalCreation.id ? updateLocalCreation : localcreation
+        )
+      );
+
+      handleCloseEditModal();
+      window.location.reload();
+
+    } catch (error) {
+      console.error("Terjadi kesalahan saat mengedit data kreasi lokal:", error);
+      };
   };
 
   // Modal Hapus
@@ -236,12 +296,13 @@ const KreasiLokal = () => {
         onHide={handleCloseDetailModal}
         backdrop="static"
         keyboard={false}
+        size="lg"
       >
         <Modal.Header closeButton>
           <Modal.Title>Detail Kreasi Lokal</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {!localcreationDetail ? (
+          {!dataDetail ? (
             <>
               <Form.Group>
                 <Form.Label>Pilih Kreasi Lokal</Form.Label>
@@ -270,28 +331,78 @@ const KreasiLokal = () => {
           ) : (
             <div>
               <p>
-                <strong>Kategori Ekraf:</strong> {localcreationDetail.kategori_ekraf}
+              <strong>Tanggal Rilis:</strong>{" "}
+                {dataDetail.createdAt
+                  ? new Date(dataDetail.createdAt).toLocaleString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
+                  : ""}
               </p>
               <p>
-                <strong>Nama Ekraf:</strong> {localcreationDetail.nama_ekraf}
+                <strong>Kategori Ekraf:</strong> {dataDetail.kategori_ekraf}
               </p>
               <p>
-                <strong>Deskripsi:</strong> {localcreationDetail.deskripsi_ekraf}
+                <strong>Nama Ekraf:</strong> {dataDetail.nama_ekraf}
+              </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Deskripsi:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="deskripsi_ekraf"
+                  name="deskripsi_ekraf"
+                  value={dataDetail.deskripsi_ekraf}
+                  rows={5}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
+              <p>
+                <strong>Alamat:</strong> {dataDetail.alamat}
               </p>
               <p>
-                <strong>Alamat:</strong> {localcreationDetail.alamat}
+                <strong>Jam Operasional:</strong> {dataDetail.jam_operasional}
               </p>
               <p>
-                <strong>Jam Operasional:</strong> {localcreationDetail.jam_operasional}
+                <strong>Harga Produk:</strong> {dataDetail.harga_produk}
               </p>
               <p>
-                <strong>Harga Produk:</strong> {localcreationDetail.harga_produk}
+                <strong>No Whatsapp:</strong> {dataDetail.no_whatsapp}
+              </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Link Gmaps:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="link_gmaps"
+                  name="link_gmaps"
+                  value={dataDetail.link_gmaps}
+                  rows={5}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
+              <p>
+                <strong>Instagram URL:</strong> {dataDetail.link_instagram}
               </p>
               <p>
-                <strong>No Whatsapp:</strong> {localcreationDetail.no_whatsapp}
+                <strong>Youtube URL:</strong> {dataDetail.link_youtube}
               </p>
               <p>
-                <strong>Link Gmaps:</strong> {localcreationDetail.link_gmaps}
+                <strong>Facebook URL:</strong> {dataDetail.link_facebook}
+              </p>
+              <p>
+                <strong>Gambar Kreasi Lokal:</strong> 
+                {dataDetail?.gambar_kreasilokal && (
+                  <img
+                    src={dataDetail.gambar_kreasilokal}
+                    alt="Gambar Kreasi Lokal"
+                    style={{ width: "100%", objectFit: "cover", marginTop: "20px"}}
+                  />
+                )}
               </p>
             </div>
           )}
@@ -300,8 +411,8 @@ const KreasiLokal = () => {
           <Button variant="secondary" onClick={handleCloseDetailModal}>
             Close
           </Button>
-          {localcreationDetail && (
-            <Button variant="primary" onClick={() => setLocalCreationDetail(null)}>
+          {dataDetail && (
+            <Button variant="primary" onClick={() => setDataDetail(null)}>
               Back
             </Button>
           )}
@@ -380,7 +491,7 @@ const KreasiLokal = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Deskripsi</Form.Label>
                     <Form.Control
@@ -389,11 +500,11 @@ const KreasiLokal = () => {
                       value={editData.deskripsi_ekraf || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={5}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Alamat</Form.Label>
                     <Form.Control
@@ -402,11 +513,11 @@ const KreasiLokal = () => {
                       value={editData.alamat || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={2}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>Jam Operasional</Form.Label>
                     <Form.Control
@@ -418,7 +529,7 @@ const KreasiLokal = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>Harga Produk</Form.Label>
                     <Form.Control
@@ -430,7 +541,7 @@ const KreasiLokal = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>No Whatsapp</Form.Label>
                     <Form.Control
@@ -442,15 +553,59 @@ const KreasiLokal = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Link Gmaps</Form.Label>
                     <Form.Control
-                      type="text"
+                      as="textarea"
                       name="link_gmaps"
                       value={editData.link_gmaps || ""}
                       onChange={handleEditChange}
                       required
+                      rows={2}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="12">
+                  <Form.Group>
+                    <Form.Label>Upload Gambar Kreasi Lokal</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="gambar_kreasilokal"
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Instagram URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_instagram"
+                      value={editData.link_instagram || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Youtube URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_youtube"
+                      value={editData.link_youtube || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Facebook URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_facebook"
+                      value={editData.link_facebook || ""}
+                      onChange={handleEditChange}
                     />
                   </Form.Group>
                 </Col>

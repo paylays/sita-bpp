@@ -1,147 +1,137 @@
-import React, { Component } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../Common/Header';
 import Banner from '../Elements/Banner';
 import SimilarDestinations from '../Elements/SimilarDestinations';
 import Footer from '../Common/Footer';
 import ReactPlayer from 'react-player';
 
-var bnrimg = require('./../../images/banner/2.jpg');
+var bnrimg = require('./../../images/banner/cover.jpg');
 
-class DestinationDetail extends Component {
-  componentDidMount() {
-    function loadScript(src) {
+const DestinationDetail = () => {
+  const { id } = useParams(); 
+  const [destination, setDestination] = useState(null);
 
-      return new Promise(function (resolve, reject) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.addEventListener('load', function () {
-          resolve();
-        });
-        script.addEventListener('error', function (e) {
-          reject(e);
-        });
-        document.body.appendChild(script);
-        document.body.removeChild(script);
-      })
+  useEffect(() => {
+    const fetchDestination = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/destinations/${id}`);
+        setDestination(response.data);
+      } catch (error) {
+        console.error('Error fetching destination:', error);
+      }
     };
 
-    loadScript('./assets/js/custom.js');
+    fetchDestination();
+  }, [id]);
 
-  };
-  render() {
-    return (
-      <>
-        <Header />
-        <div className="page-content">
-          <Banner 
-            title="Pantai 1" 
-            pagename="Detail Destinasi" 
-            description="Jelajahi informasi lengkap tentang destinasi pilihan Anda, termasuk lokasi, daya tarik, fasilitas, dan pengalaman terbaik yang bisa Anda dapatkan." 
-            bgimage={bnrimg} 
-          />
+  if (!destination) {
+    return <div>Data tidak ditemukan</div>;
+  }
 
-          {/* SECTION CONTENT START */}
-          <div className="section-full p-tb80 inner-page-padding stick_in_parent">
-            <div className="container">
-              <div className="row">
-                <div className="col-lg-7 col-md-7  sticky_column">
-                  <div className="project-detail-containt">
-                    <div className="bg-white text-black">
-                      <h3>Pesona Keindahan Pantai 1 yang Memukau </h3>
-                      <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus sequi modi aperiam, animi a eveniet explicabo eum sapiente reprehenderit obcaecati illum numquam pariatur nobis perferendis? Accusantium autem repellat error soluta. Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint, nesciunt et voluptas excepturi unde quis accusamus accusantium quibusdam alias est facilis velit aliquid totam omnis neque tempore maxime possimus? Distinctio. </p>
-                      <div className="product-block">
-                        <ul>
-                          <li>
-                            <h4 className="m-b10">Jam Operasional</h4>
-                            <p>08.00 - 17.00 WITA</p>
-                          </li>
-                          <li>
-                            <h4 className="m-b10">Harga Tiket</h4>
-                            <p>Rp10.000 - Rp30.000,-</p>
-                          </li>
-                          <li>
-                            <h4 className="m-b10">Fasilitas</h4>
-                            <p>Area Parkir, Toilet Umum, Kamar Mandi, Warung Makan</p>
-                          </li>
-                          <li>
-                            <h4 className="m-b10">Aktivitas</h4>
-                            <p>-</p>
-                          </li>
-                          <li>
-                            <h4 className="m-b10">Alamat</h4>
-                            <p>Jl. Marsma R. Iswahyudi No.121, Gn. Bahagia, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76114</p>
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="m-b0">
-                        <div className="sx-divider divider-1px  bg-black"><i className="icon-dot c-square" /></div>
-                      </div>
-                      <ul className="social-icons social-square social-darkest m-b0">
-                        <li><a href="https://www.facebook.com" className="fa fa-facebook" target="_blank" rel="noreferrer" /></li>
-                        <li><a href="https://twitter.com" className="fa fa-twitter" target="_blank" rel="noreferrer" /></li>
-                        <li><a href="https://www.youtube.com" className="fa fa-youtube" target="_blank" rel="noreferrer" /></li>
-                        <li><a href="https://www.instagram.com" className="fa fa-instagram" target="_blank" rel="noreferrer" /></li>
-                        <li><a href="tel:+62542763768" className="fa fa-phone" target="_blank" rel="noreferrer" /></li>
+  const categoryColors = {
+    "Wisata Alam": "rgba(34, 139, 34, 0.5)",
+    "Wisata Buatan": "rgba(255, 140, 0, 0.5)",
+    "Wisata Sejarah": "rgba(139, 69, 19, 0.5)", 
+    "Wisata Religi": "rgba(128, 0, 128, 0.5)", 
+    "Wisata Bahari": "rgba(30, 144, 255, 0.5)",
+    "Wisata Belanja": "rgba(255, 20, 147, 0.5)", 
+    "Wisata Kuliner": "rgba(220, 20, 60, 0.5)", 
+    "Wisata Olahraga": "rgba(255, 215, 0, 0.5)"
+  }; 
+
+  return (
+    <>
+      <Header />
+      <div className="page-content">
+        <Banner
+          title="Pantai 1"
+          pagename="Detail Destinasi"
+          description="Jelajahi informasi lengkap tentang destinasi pilihan Anda."
+          bgimage={bnrimg}
+        />
+
+        <div className="section-full p-tb80 inner-page-padding stick_in_parent">
+          <div className="container">
+            <div className="row">
+              <div className="col-lg-7 col-md-7 sticky_column">
+                <div className="project-detail-containt">
+                  <div className="bg-white text-black">
+                    <h3>{destination.nama_destinasi}</h3>
+                    <p style={{ maxWidth: "630px", wordWrap: "break-word" }}>
+                    {destination.deskripsi_destinasi}
+                    </p>
+                    <div className="product-block">
+                      <ul>
+                        <li><h4>Jam Operasional</h4><p>{destination.jam_operasional}</p></li>
+                        <li><h4>Harga Tiket</h4><p>{destination.harga_tiket}</p></li>
+                        <li><h4>Fasilitas</h4><p>{destination.fasilitas}</p></li>
+                        <li><h4>Aktivitas</h4><p>{destination.aktivitas || '-'}</p></li>
+                        <li><h4>Alamat</h4><p>{destination.alamat}</p></li>
                       </ul>
                     </div>
+                    <div className="sx-divider divider-1px bg-black"></div>
+                    <ul className="social-icons social-square social-darkest m-b0">
+                      <li>
+                        <a 
+                          href={`https://wa.me/${destination.link_whatsapp.replace(/^0/, "62")}`} 
+                          target="_blank" 
+                          className="fa fa-whatsapp"
+                          rel="noreferrer" 
+                        />
+                      </li>
+                      <li><a href={destination.link_instagram} target="_blank" className="fa fa-instagram" rel="noreferrer" /></li>                      
+                      <li><a href={destination.link_youtube} target="_blank" className="fa fa-youtube" rel="noreferrer" /></li>
+                      <li><a href={destination.link_facebook} target="_blank" className="fa fa-facebook" rel="noreferrer" /></li>
+                    </ul>
                   </div>
                 </div>
-                <div className="col-lg-5 col-md-5 ">
-                  <div className="project-detail-outer">
-                    <div className="project-detail-pic m-b30">
-                      <div className="sx-media">
-                          <img src={require('./../../images/projects/portrait/pic7.jpg')} alt="" />
+              </div>
+              <div className="col-lg-5 col-md-5">
+                <div className="project-detail-outer">
+                  <div className="sx-box image-hover-block m-b30">
+                    {destination.kategori_destinasi && (
+                      <div
+                        className="shop-pro-sale-bnr px-2 py-1 text-white font-bold rounded"
+                        style={{
+                          backgroundColor: categoryColors[destination.kategori_destinasi],
+                        }}
+                      >
+                        {destination.kategori_destinasi}
                       </div>
+                    )}
+                    <div className="sx-thum-bx">
+                      <img src={`http://localhost:5000/uploads/${destination.gambar_destinasi}`} alt={destination.nama_destinasi} style={{ width: "100", height: "300px", objectFit: "cover" }}/>
                     </div>
-                    <div className="project-detail-pic m-b30">
-                      <div className="sx-media">
-                        <img src={require('./../../images/projects/portrait/pic4.jpg')} alt="" />
-                      </div>
-                    </div>
-                    <div className="sx-box m-b30">
-                      <div className="sx-thum-bx sx-img-overlay1 sx-img-effect yt-thum-box">
-                        <img src="https://img.youtube.com/vi/Oy2QIiSQT2U/0.jpg" alt="" />
-                        <NavLink to={"#"} className="play-now" data-toggle="modal" data-target="#myModal5">
-                          <i className="icon fa fa-play" />
-                          <span className="ripple" />
-                        </NavLink>
-                        </div>
-                    </div>
-                    <div className="sx-box m-b30">
-                      <div className="gmap-outline">
+                    <a className="mfp-link" href={`http://localhost:5000/uploads/${destination.gambar_destinasi}`}>
+                      <i className="fa fa-arrows-alt" />
+                    </a>
+                  </div>
+                  <div className="sx-box m-b30">
+                    <div className="gmap-outline">
                       <h4>Titik Lokasi</h4>
-                        <iframe
-                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7977.84452660657!2d116.97478959116717!3d-1.2143308450963226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df14ffec9e80f6d%3A0x4ee3db09c1de1650!2sPantai%20Manggar%20Sagara%20Sari!5e0!3m2!1sid!2sid!4v1738477280044!5m2!1sid!2sid"
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          allowFullScreen=""
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                        ></iframe>
-                      </div>
+                      <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63823.88822726873!2d116.96058194999999!3d-1.1654029000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df14e6abeaae51f%3A0x63b6d6597f86a4a!2sLamaru%2C%20Balikpapan%20Timur%2C%20Balikpapan%20City%2C%20East%20Kalimantan!5e0!3m2!1sen!2sid!4v1739288377425!5m2!1sen!2sid"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                      ></iframe>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          {/* SECTION CONTENT END  */}
-          <SimilarDestinations />
         </div>
 
-        <div className="modal fade" id="myModal5" role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <ReactPlayer url='https://www.youtube.com/watch?v=Oy2QIiSQT2U' />
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-}
+        <SimilarDestinations currentId={id} />
+      </div>
+      <Footer />
+    </>
+  );
+};
 
 export default DestinationDetail;

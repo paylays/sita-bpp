@@ -1,0 +1,56 @@
+const localcreations = [
+  {
+  image: require('./../../images/projects/portrait/pic1.jpg'),
+  title: 'Interior Work Avroko',
+  address: 'Muscat, Sultanate of Oman',
+  filter: 'cat-1'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic2.jpg'),
+    title: 'Vilters',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-2'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic3.jpg'),
+    title: 'Industrial Design',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-3'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic4.jpg'),
+    title: 'House Bluprint',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-4'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic5.jpg'),
+    title: 'Modern Bathroom',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-5'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic6.jpg'),
+    title: 'Bellevue Project',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-4'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic7.jpg'),
+    title: 'Qatar Pavilion',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-3'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic8.jpg'),
+    title: 'Museum',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-2'
+  },
+  {
+    image: require('./../../images/projects/portrait/pic9.jpg'),
+    title: 'Modern house',
+    address: 'Muscat, Sultanate of Oman',
+    filter: 'cat-1'
+  }
+]

@@ -47,7 +47,7 @@ exports.createEvent = async (req, res) => {
       tanggal_mulai_acara,
       tanggal_selesai_acara,
       waktu_acara,
-      gambar_acara: req.file.filename, // Simpan nama file gambar
+      gambar_acara: req.file.filename,
     });
 
     res.status(201).json(newEvent);
@@ -59,8 +59,8 @@ exports.createEvent = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
   try {
-    console.log("Request Body:", req.body); // Tambahkan log ini
-    console.log("Uploaded File:", req.file); // Cek apakah ada file baru
+    console.log("Request Body:", req.body); 
+    console.log("Uploaded File:", req.file);
     
     const event = await Event.findByPk(req.params.id);
     if (!event) {

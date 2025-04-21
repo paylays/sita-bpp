@@ -42,10 +42,26 @@ const Accomodation = sequelize.define('Accomodation', {
     kategori_akomodasi: {
         type: DataTypes.STRING,
         allowNull: true
-    }
+    },
+    gambar_akomodasi: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    link_instagram: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    link_youtube: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    link_facebook: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
 }, {
     tableName: 'accomodations',
-    timestamps: false
+    timestamps: true
 });
 
 module.exports = Accomodation;

@@ -14,61 +14,91 @@ const TambahAkomodasi = () => {
     no_whatsapp: '',
     alamat: '',
     link_gmaps: '',
+    gambar_akomodasi: null,
+    link_instagram: '',
+    link_youtube: '',
+    link_facebook: '',
   });
 
   const kategoriList = [
     { id: 1, name: 'Agen Perjalanan Wisata' },
-    { id: 1, name: 'Biro Perjalanan Wisata' },
-    { id: 1, name: 'Guest House' },
-    { id: 1, name: 'Homestay' },
-    { id: 2, name: 'Hotel Bintang 1' },
-    { id: 3, name: 'Hotel Bintang 2' },
-    { id: 4, name: 'Hotel Bintang 3' },
-    { id: 5, name: 'Hotel Bintang 4' },
-    { id: 6, name: 'Hotel Bintang 5' },
-    { id: 7, name: 'Hotel Non-Bintang' },
-    { id: 9, name: 'Vila' },
+    { id: 2, name: 'Biro Perjalanan Wisata' },
+    { id: 3, name: 'Guest House' },
+    { id: 4, name: 'Homestay' },
+    { id: 5, name: 'Hotel Bintang 1' },
+    { id: 6, name: 'Hotel Bintang 2' },
+    { id: 7, name: 'Hotel Bintang 3' },
+    { id: 8, name: 'Hotel Bintang 4' },
+    { id: 9, name: 'Hotel Bintang 5' },
+    { id: 10, name: 'Hotel Non-Bintang' },
+    { id: 11, name: 'Vila' },
   ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setFormData(prev => ({
+        ...prev,
+        [name]: files[0], 
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-
+    
     if (form.checkValidity() === false) {
       event.stopPropagation();
     }
 
-    if (form.checkValidity()) {
-      try {
-        const response = await axios.post('http://localhost:5000/api/accomodations/create', formData);
-        console.log('Akomodasi berhasil ditambahkan:', response.data);
-
-        // Reset form dan validasi
-        setFormData({
-          kategori_akomodasi: '',
-          nama_akomodasi: '',
-          deskripsi_akomodasi: '',
-          jumlah_kamar_tersedia: '',
-          harga_kamar: '',
-          fasilitas: '',
-          no_whatsapp: '',
-          alamat: '',
-          link_gmaps: '',
-        });
-      } catch (error) {
-        console.error('Error saat menambahkan akomodasi:', error);
-      } 
+    const data = new FormData();
+    data.append("kategori_akomodasi", formData.kategori_akomodasi);
+    data.append("nama_akomodasi", formData.nama_akomodasi);
+    data.append("deskripsi_akomodasi", formData.deskripsi_akomodasi);
+    data.append("jumlah_kamar_tersedia", formData.jumlah_kamar_tersedia);
+    data.append("harga_kamar", formData.harga_kamar);
+    data.append("fasilitas", formData.fasilitas);
+    data.append("no_whatsapp", formData.no_whatsapp);
+    data.append("alamat", formData.alamat);
+    data.append("link_gmaps", formData.link_gmaps);
+    data.append("link_instagram", formData.link_instagram);
+    data.append("link_youtube", formData.link_youtube);
+    data.append("link_facebook", formData.link_facebook);
+    if (formData.gambar_akomodasi) {
+      data.append("gambar_akomodasi", formData.gambar_akomodasi);
     }
-  };
 
+    try {
+      const response = await axios.post("http://localhost:5000/api/accomodations/create", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Event berhasil ditambahkan:", response.data);
+
+      setFormData({
+        kategori_akomodasi: '',
+        nama_akomodasi: '',
+        deskripsi_akomodasi: '',
+        jumlah_kamar_tersedia: '',
+        harga_kamar: '',
+        fasilitas: '',
+        no_whatsapp: '',
+        alamat: '',
+        link_gmaps: '',
+        gambar_akomodasi: null,
+      });
+    } catch (error) {
+      console.error('Error saat menambahkan akomodasi:', error);
+    } 
+  };
 
   return(
     <>
@@ -85,7 +115,7 @@ const TambahAkomodasi = () => {
                       <p>Mohon mengisi data akomodasi dengan benar.</p>
                       <Form  onSubmit={handleSubmit}>
                         <Row>
-                          <Col md="4" className="mb-3">
+                          <Col md="3" className="mb-3">
                             <Form.Label htmlFor="nama_akomodasi">Nama Akomodasi</Form.Label>
                             <Form.Control
                               type="text"
@@ -96,19 +126,7 @@ const TambahAkomodasi = () => {
                               required
                             />
                           </Col>
-                          <Col md="4" className="mb-3">
-                            <Form.Label htmlFor="deskripsi_akomodasi">Deskripsi</Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              id="deskripsi_akomodasi"
-                              name="deskripsi_akomodasi"
-                              value={formData.deskripsi_akomodasi}
-                              onChange={handleChange}
-                              required
-                              rows={1}
-                            />
-                          </Col>
-                          <Col md="4" className="mb-3">
+                          <Col md="3" className="mb-3">
                             <Form.Label htmlFor="kategori_akomodasi">Kategori Akomodasi</Form.Label>
                             <Form.Select
                               id="kategori_akomodasi"
@@ -118,14 +136,14 @@ const TambahAkomodasi = () => {
                               required
                             >
                               <option value="">Pilih Kategori</option>
-                              {kategoriList.map((kategori) => (
-                                <option key={kategori.id} value={kategori.name}>
-                                  {kategori.name}
+                              {kategoriList.map((category) => (
+                                <option key={category.id} value={category.name}>
+                                  {category.name}
                                 </option>
                               ))}
                             </Form.Select>
                           </Col>
-                          <Col md="3" className="mb-3">
+                          <Col md="6" className="mb-3">
                             <Form.Label htmlFor="alamat">Alamat</Form.Label>
                             <Form.Control
                               as="textarea"
@@ -137,7 +155,19 @@ const TambahAkomodasi = () => {
                               rows={1}
                             />
                           </Col>
-                          <Col md="3" className="mb-3">
+                          <Col md="12" className="mb-3">
+                            <Form.Label htmlFor="deskripsi_akomodasi">Deskripsi</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              id="deskripsi_akomodasi"
+                              name="deskripsi_akomodasi"
+                              value={formData.deskripsi_akomodasi}
+                              onChange={handleChange}
+                              required
+                              rows={5}
+                            />
+                          </Col>
+                          <Col md="4" className="mb-3">
                             <Form.Label htmlFor="jumlah_kamar_tersedia">Jumlah Kamar Tersedia</Form.Label>
                             <Form.Control
                               type="text"
@@ -148,7 +178,7 @@ const TambahAkomodasi = () => {
                               required
                             />
                           </Col>
-                          <Col md="3" className="mb-3">
+                          <Col md="4" className="mb-3">
                             <Form.Label htmlFor="harga_kamar">Harga Kamar</Form.Label>
                             <Form.Control
                               type="text"
@@ -159,7 +189,7 @@ const TambahAkomodasi = () => {
                               required
                             />
                           </Col>
-                          <Col md="3" className="mb-3">
+                          <Col md="4" className="mb-3">
                             <Form.Label htmlFor="no_whatsapp">No. Whatsapp</Form.Label>
                             <Form.Control
                               type="text"
@@ -193,6 +223,49 @@ const TambahAkomodasi = () => {
                               required
                             />
                           </Col>
+                          <Col md="12" className="mb-3">
+                            <Form.Label htmlFor="gambar_akomodasi">Gambar Akomodasi</Form.Label>
+                            <Form.Control
+                              type="file"
+                              id="gambar_akomodasi"
+                              name="gambar_akomodasi"
+                              accept="image/*"
+                              onChange={handleChange}
+                              required
+                            />
+                          </Col>
+                          <Col md="4" className="mb-3">
+                              <Form.Label htmlFor="link_instagram">Instagram URL</Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="link_instagram"
+                                name="link_instagram"
+                                value={formData.link_instagram}
+                                onChange={handleChange}
+                                required
+                              />
+                            </Col>
+                            <Col md="4" className="mb-3">
+                              <Form.Label htmlFor="link_youtube">Youtube URL</Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="link_youtube"
+                                name="link_youtube"
+                                value={formData.link_youtube}
+                                onChange={handleChange}
+                                required
+                              />
+                            </Col>
+                            <Col md="4" className="mb-3">
+                              <Form.Label htmlFor="link_facebook">Facebook URL</Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="link_facebook"
+                                name="link_facebook"
+                                value={formData.link_facebook}
+                                onChange={handleChange}
+                              />
+                            </Col>
                         </Row>
                         <Form.Group>
                           <Button 

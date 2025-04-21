@@ -4,99 +4,89 @@ import Header from '../Common/Header';
 import Banner from '../Elements/Banner';
 import CategorySideBar from '../Elements/CategorySideBar';
 import Footer from '../Common/Footer';
+import axios from 'axios';
 
 const filters = [
-  { label: "Bahari", filter: ".cat-1" },
-  { label: "Alam", filter: ".cat-2" },
-  { label: "Buatan", filter: ".cat-3" },
-  { label: "Religi", filter: ".cat-4" },
-  { label: "Sejarah", filter: ".cat-5" },
-  { label: "Kuliner & Belanja", filter: ".cat-6" }
+  { label: "Wisata Alam", filter: ".cat-1" },
+  { label: "Wisata Buatan", filter: ".cat-2" },
+  { label: "Wisata Sejarah", filter: ".cat-3" },
+  { label: "Wisata Religi", filter: ".cat-4" },
+  { label: "Wisata Bahari", filter: ".cat-5" },
+  { label: "Wisata Belanja", filter: ".cat-6" },
+  { label: "Wisata Kuliner", filter: ".cat-7" },
+  { label: "Wisata Olahraga", filter: ".cat-8" },
 ]
 
-const destinations = [
-  {
-  image: require('./../../images/projects/portrait/pic1.jpg'),
-  title: 'Interior Work Avroko',
-  address: 'Muscat, Sultanate of Oman',
-  filter: 'cat-1'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic2.jpg'),
-    title: 'Vilters',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-2'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic3.jpg'),
-    title: 'Industrial Design',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-3'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic4.jpg'),
-    title: 'House Bluprint',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-4'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic5.jpg'),
-    title: 'Modern Bathroom',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-5'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic6.jpg'),
-    title: 'Bellevue Project',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-4'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic7.jpg'),
-    title: 'Qatar Pavilion',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-3'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic8.jpg'),
-    title: 'Museum',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-2'
-  },
-  {
-    image: require('./../../images/projects/portrait/pic9.jpg'),
-    title: 'Modern house',
-    address: 'Muscat, Sultanate of Oman',
-    filter: 'cat-6'
-  }
-]
+const categoryMap = {
+  "Wisata Alam": "cat-1",
+  "Wisata Buatan": "cat-2",
+  "Wisata Sejarah": "cat-3",
+  "Wisata Religi": "cat-4",
+  "Wisata Bahari": "cat-5",
+  "Wisata Belanja": "cat-6",
+  "Wisata Kuliner": "cat-7",
+  "Wisata Olahraga": "cat-8"
+};
 
-var bnrimg = require('./../../images/banner/3.jpg');
-var bgimg1 = require('./../../images/background/cross-line.png');
+var bnrimg = require('./../../images/banner/cover.jpg');
+// var bgimg1 = require('./../../images/background/cross-line.png');
 
 class Destination extends Component {
-  componentDidMount() {
-    function loadScript(src) {
-
-      return new Promise(function (resolve, reject) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.addEventListener('load', function () {
-          resolve();
-        });
-        script.addEventListener('error', function (e) {
-          reject(e);
-        });
-        document.body.appendChild(script);
-        document.body.removeChild(script);
-    })
+  constructor(props) {
+    super(props);
+    this.state = {
+      destinations: [],
+      searchQuery: "",
+      selectedKecamatan: "",
     };
+  }
 
-    loadScript('./assets/js/custom.js');
+  componentDidMount() {
+    this.fetchDestinations();
+  }
 
+  fetchDestinations = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/destinations');
+      this.setState({ destinations: response.data });
+    } catch (error) {
+      console.error('Error fetching destinations:', error);
+    }
+  };
+
+  handleSearch = (query) => {
+    this.setState({ searchQuery: query });
+  };
+
+  handleFilterKecamatan = (kecamatan) => {
+    this.setState({ selectedKecamatan: kecamatan });
   };
   
   render() {
+    const { destinations, searchQuery, selectedKecamatan  } = this.state;
+
+    const filteredDestinations = destinations.filter((item) => {
+      const matchesSearch = 
+        item.nama_destinasi.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.kategori_destinasi.toLowerCase().includes(searchQuery.toLowerCase());
+  
+      const matchesKecamatan = 
+        !selectedKecamatan || item.alamat.includes(selectedKecamatan);
+  
+      return matchesSearch && matchesKecamatan;
+    });
+
+    const categoryColors = {
+      "Wisata Alam": "rgba(34, 139, 34, 0.5)",
+      "Wisata Buatan": "rgba(255, 140, 0, 0.5)",
+      "Wisata Sejarah": "rgba(139, 69, 19, 0.5)", 
+      "Wisata Religi": "rgba(128, 0, 128, 0.5)", 
+      "Wisata Bahari": "rgba(30, 144, 255, 0.5)",
+      "Wisata Belanja": "rgba(255, 20, 147, 0.5)", 
+      "Wisata Kuliner": "rgba(220, 20, 60, 0.5)", 
+      "Wisata Olahraga": "rgba(255, 215, 0, 0.5)"
+    };    
+
     return (
       <>
         <Header />
@@ -118,7 +108,7 @@ class Destination extends Component {
                   </li>
                   {filters.map((item, index) => (
                     <li key={index}>    
-                      <NavLink to={"#"} className="btn from-top" data-filter={item.filter}>
+                      <NavLink to={"#"} className="btn from-top" data-filter={`.${item.filter.replace('.', '')}`}>
                         {item.label}
                       </NavLink>
                     </li>
@@ -130,17 +120,30 @@ class Destination extends Component {
                 <div className="col-lg-8 col-md-12">
                   {/* Gallery Items */}
                   <ul className="masonry-outer mfp-gallery work-grid row clearfix list-unstyled">
-                    {destinations.map((item, index) => (
-                      <div key={index} className={`${item.filter} masonry-item col-lg-4 col-md-6 col-sm-12 m-b30`}>
+                    {filteredDestinations.map((item, index) => (
+                      <div key={index} className={`masonry-item col-lg-4 col-md-6 col-sm-12 m-b30 ${categoryMap[item.kategori_destinasi] || ''}`}>
                         <div className="sx-box image-hover-block">
+                          {item.kategori_destinasi && (
+                            <div
+                              className="shop-pro-sale-bnr px-2 py-1 text-white font-bold rounded"
+                              style={{
+                                backgroundColor: categoryColors[item.kategori_destinasi],
+                              }}
+                            >
+                              {item.kategori_destinasi}
+                            </div>
+                          )}
                           <div className="sx-thum-bx">
-                            <img src={item.image} alt="" />
+                            <img src={`http://localhost:5000/uploads/${item.gambar_destinasi}`} alt={item.nama_destinasi} style={{ width: "100", height: "300px", objectFit: "cover" }}/>
                           </div>
                           <div className="sx-info p-t20 text-white">
-                            <h4 className="sx-tilte"><NavLink to={"/destination-detail"}>{item.title}</NavLink></h4>
-                            <p className="m-b0">{item.address}</p>
+                            <h4 className="sx-tilte"><NavLink to={`/destinasi-detail/${item.id}`}>{item.nama_destinasi}</NavLink></h4>
+                            <p className="m-b0">{item.kategori_destinasi}</p>
+                            <p className="m-b0">
+                              {item.alamat.match(/Kecamatan\s(.+)/)?.[1] || "Kecamatan tidak tersedia"}
+                            </p>
                           </div>
-                          <a className="mfp-link" href={item.image}>
+                          <a className="mfp-link" href={`http://localhost:5000/uploads/${item.gambar_destinasi}`}>
                             <i className="fa fa-arrows-alt" />
                           </a>
                         </div>
@@ -148,13 +151,13 @@ class Destination extends Component {
                     ))}
                   </ul>
                   {/* Load More Button */}
-                  <div className="text-center load-more-btn-outer" style={{ backgroundImage: 'url(' + bgimg1 + ')' }}>
+                  {/* <div className="text-center load-more-btn-outer" style={{ backgroundImage: 'url(' + bgimg1 + ')' }}>
                     <button className="site-button-secondry btn-half"><span>Load More</span></button>
-                  </div>
+                  </div> */}
                 </div>
                 {/* SIDEBAR */}
                 <div className="col-lg-4 col-md-12 sticky_column m-b30">
-                  <CategorySideBar />
+                  <CategorySideBar onSearch={this.handleSearch} onFilterKecamatan={this.handleFilterKecamatan} />
                 </div>
               </div>
             </div>

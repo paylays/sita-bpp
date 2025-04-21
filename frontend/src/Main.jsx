@@ -1,6 +1,6 @@
 // Main.jsx
 import React, { Component } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ScrollToTop from './components/Common/ScrollToTop';
 import Switcher from './components/Elements/Switcher';
 
@@ -33,10 +33,10 @@ class Main extends Component {
             <Route path='/acara' element={<Event/>} />
             <Route path='/tentang-kami' element={<AboutUs/>} />
 
-            <Route path='/destination-detail' element={<DestinationDetail/>} />
-            <Route path='/kreasi-lokal-detail' element={<LocalCreationDetail/>} />
-            <Route path='/akomodasi-detail' element={<AccomodationDetail/>} />
-            <Route path='/acara-detail' element={<EventDetail/>} />
+            <Route path='/destinasi-detail/:id' element={<DestinationDetail/>} />
+            <Route path='/kreasi-lokal-detail/:id' element={<LocalCreationDetail/>} />
+            <Route path='/akomodasi-detail/:id' element={<AccomodationDetail/>} />
+            <Route path='/acara-detail/:id' element={<EventDetail/>} />
             
             <Route path='*' element={<Error/>} />
           </Routes>

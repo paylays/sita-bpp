@@ -119,8 +119,6 @@ const Header = memo((props) => {
                                   </div>
                               </Dropdown.Toggle>
                               <Dropdown.Menu  className="dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                  <Dropdown.Item href="https://templates.iqonic.design/hope-ui/react/build/dashboard/app/user-profile">Profile</Dropdown.Item>
-                                  <Dropdown.Divider />
                                   <Dropdown.Item onClick={confirmLogout}>Logout</Dropdown.Item>
                               </Dropdown.Menu>
                           </Dropdown>

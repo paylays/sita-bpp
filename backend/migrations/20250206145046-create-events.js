@@ -40,12 +40,12 @@ module.exports = {
       },
       createdAt: {
         type: Sequelize.TIMESTAMP,
-        allowNull: false,
+        allowNull: true,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updateAt: {
         type: Sequelize.TIMESTAMP,
-        allowNull: false,
+        allowNull: true,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });

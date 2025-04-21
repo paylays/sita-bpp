@@ -35,10 +35,10 @@ class Home extends Component {
         <Header />
         <div className="page-content">
           <Slider />
-          <Statistics />
           <FavoriteDestinations />
           <FavoriteLocalCreations />
           <FavoriteAccomodations />
+          <Statistics />
         </div>
         <Footer />
       </>

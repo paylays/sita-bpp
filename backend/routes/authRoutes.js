@@ -30,7 +30,6 @@ router.post("/logout", (req, res) => {
   return res.status(200).json({ message: "Logout berhasil!" });
 });
 
-// Contoh penggunaan checkBlacklist untuk endpoint yang butuh autentikasi
 router.get("/protected", checkBlacklist, (req, res) => {
   res.json({ message: "Anda dapat mengakses halaman ini" });
 });

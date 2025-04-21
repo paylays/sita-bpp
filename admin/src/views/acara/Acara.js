@@ -47,7 +47,6 @@ const Acara = () => {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: false, 
     }),
     item.penyelenggara_acara,
@@ -55,7 +54,6 @@ const Acara = () => {
     `<span class="badge shaped-pill bg-${item.status_acara === "upcoming" ? "warning" : "success"}">
       ${item.status_acara}
     </span>`,
-    `<div style="white-space: normal; max-width: 800px;">${item.deskripsi_acara}</div>`,
     new Date(item.tanggal_mulai_acara).toLocaleDateString("id-ID", {
       year: "numeric",
       month: "long",
@@ -67,6 +65,7 @@ const Acara = () => {
       day: "numeric",
     }),
     item.waktu_acara ? item.waktu_acara.slice(0, 5) : "",
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.deskripsi_acara}</div>`,
     item.gambar_acara 
       ? `<img src="http://localhost:5000/uploads/${item.gambar_acara}" alt="Gambar Acara" width="100"/>`
       : "Tidak ada gambar",
@@ -78,10 +77,10 @@ const Acara = () => {
       { title: "Penyelenggara Acara" },
       { title: "Judul Acara" },
       { title: "Status" },
-      { title: "Deskripsi Acara" },
       { title: "Tanggal Mulai" },
       { title: "Tanggal Selesai" },
       { title: "Waktu Acara" },
+      { title: "Deskripsi Acara" },
       { title: "Gambar Acara" },
     ],
     data: tableData,
@@ -149,30 +148,30 @@ const Acara = () => {
 
   const handleEditChange = (e) => {
     const { name, value, type, files } = e.target;
-  
+
     setEditData((prevData) => ({
-      ...prevData,
-      [name]: type === "file" ? files[0] : value, // Simpan file jika ada
+        ...prevData,
+        [name]: type === "file" ? files[0] : value,
     }));
-  };  
+};
 
   const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedEditId || !editData) return;
-  
-    const formData = new FormData();
-  
-    // Tambahkan semua data ke FormData, termasuk file jika ada
-    Object.keys(editData).forEach((key) => {
-      if (key === "gambar_acara" && editData[key] instanceof File) {
-        formData.append(key, editData[key]); // Jika ada file baru, tambahkan
-      } else {
-        formData.append(key, editData[key]); // Tambahkan data biasa
+      e.preventDefault();
+      if (!selectedEditId || !editData) return;
+
+      const formData = new FormData();
+
+      if (editData.gambar_acara instanceof File) {
+          formData.append("gambar_acara", editData.gambar_acara);
       }
-    });
-  
-    try {
-      // Kirim data update ke backend
+
+      Object.keys(editData).forEach((key) => {
+        if (key !== "gambar_acara") { 
+          formData.append(key, editData[key] || ""); 
+        }
+      });
+
+      try {
       const response = await axios.put(
         `http://localhost:5000/api/events/edit/${selectedEditId}`, 
         formData, 
@@ -182,26 +181,21 @@ const Acara = () => {
           },
         }
       );
-  
-      // Jika update sukses, hapus file lama (jika ada file baru)
-      if (editData.gambar_acara instanceof File) {
-        await axios.delete(`http://localhost:5000/api/events/delete-file/${selectedEditId}`);
-        console.log("File lama berhasil dihapus");
-      }
-  
+
       const updatedEvent = response.data;
+
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === updatedEvent.id ? updatedEvent : event
         )
       );
-      
+
       handleCloseEditModal();
-      window.location.href = window.location.href;
-    } catch (error) {
-      console.error("Terjadi kesalahan saat mengedit data acara:", error);
-    }
+      } catch (error) {
+          console.error("Terjadi kesalahan saat mengedit data acara:", error);
+      }
   };
+  
 
   // Fungsi Membuka Modal Hapus
   const handleShowDeleteModal = () => {
@@ -387,7 +381,7 @@ const Acara = () => {
                   <img
                     src={dataDetail.gambar_acara}
                     alt="Gambar Acara"
-                    style={{ width: "100%", maxHeight: "500px", objectFit: "cover", marginTop: "20px"}}
+                    style={{ width: "100%", objectFit: "cover", marginTop: "20px"}}
                   />
                 )}
               </p>

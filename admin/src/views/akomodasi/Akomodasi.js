@@ -35,20 +35,52 @@ const Akomodasi = () => {
       });
   }, []);
 
+  const categoryColors = {
+    "Agen Perjalanan Wisata": "rgba(255, 99, 71, 0.5)",
+    "Biro Perjalanan Wisata": "rgba(30, 144, 255, 0.5)",
+    "Guest House": "rgba(60, 179, 113, 0.5)",
+    "Homestay": "rgba(255, 165, 0, 0.5)",
+    "Hotel Bintang 1": "rgba(218, 112, 214, 0.5)",
+    "Hotel Bintang 2": "rgba(0, 191, 255, 0.5)",
+    "Hotel Bintang 3": "rgba(34, 139, 34, 0.5)",
+    "Hotel Bintang 4": "rgba(255, 215, 0, 0.5)", 
+    "Hotel Bintang 5": "rgba(178, 34, 34, 0.5)",
+    "Hotel Non-Bintang": "rgba(169, 169, 169, 0.5)",
+    "Vila": "rgba(70, 130, 180, 0.5)"
+  };
+
   const tableData = accomodations.map((item) => [
-    item.kategori_akomodasi,
+    new Date(item.createdAt).toLocaleString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, 
+    }),
+    `<span class="badge shaped-pill" 
+      style="background-color: ${categoryColors[item.kategori_akomodasi] || 'gray'}; color: white;">
+      ${item.kategori_akomodasi}
+    </span>`,
     item.nama_akomodasi,
-    item.deskripsi_akomodasi,
-    item.alamat,
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.deskripsi_akomodasi}</div>`,
+    `<div style="white-space: normal; width: 400px;">${item.alamat}</div>`,
     item.jumlah_kamar_tersedia,
     item.harga_kamar,
     item.fasilitas,
     item.no_whatsapp,
-    item.link_gmaps,
+    `<div style="white-space: normal; width: 300px; max-height: 200px; overflow: auto;">${item.link_gmaps}</div>`,
+    item.gambar_akomodasi 
+    ? `<img src="http://localhost:5000/uploads/${item.gambar_akomodasi}" alt="Gambar Akomodasi" width="100"/>`
+    : "Tidak ada gambar",
+    item.link_instagram,
+    item.link_youtube,
+    item.link_facebook,
   ]);
 
   const DataTableOptions = {
     columns: [
+      { title: "Tanggal Rilis" },
       { title: "Kategori Akomodasi" },
       { title: "Nama Akomodasi" },
       { title: "Deskripsi" },
@@ -58,6 +90,10 @@ const Akomodasi = () => {
       { title: "Fasilitas" },
       { title: "No Whatsapp" },
       { title: "Link Gmaps" },
+      { title: "Gambar Akomodasi" },
+      { title: "Instagram URL" },
+      { title: "Youtube URL" },
+      { title: "Facebook URL" },
     ],
     data: tableData,
   };
@@ -82,7 +118,13 @@ const Akomodasi = () => {
     axios
       .get(`http://localhost:5000/api/accomodations/${selectedDetailId}`)
       .then((response) => {
-        setDataDetail(response.data);
+        const eventData = response.data
+        setDataDetail({
+          ...eventData,
+          gambar_akomodasi: eventData.gambar_akomodasi
+            ? `http://localhost:5000/uploads/${eventData.gambar_akomodasi}`
+            : null,
+        });
       })
       .catch((error) => {
         console.error("Terjadi kesalahan saat mengambil detail akomodasi:", error);
@@ -92,16 +134,16 @@ const Akomodasi = () => {
   // Membuka Modal Edit
   const kategoriList = [
     { id: 1, name: 'Agen Perjalanan Wisata' },
-    { id: 1, name: 'Biro Perjalanan Wisata' },
-    { id: 1, name: 'Guest House' },
-    { id: 1, name: 'Homestay' },
-    { id: 2, name: 'Hotel Bintang 1' },
-    { id: 3, name: 'Hotel Bintang 2' },
-    { id: 4, name: 'Hotel Bintang 3' },
-    { id: 5, name: 'Hotel Bintang 4' },
-    { id: 6, name: 'Hotel Bintang 5' },
-    { id: 7, name: 'Hotel Non-Bintang' },
-    { id: 9, name: 'Vila' },
+    { id: 2, name: 'Biro Perjalanan Wisata' },
+    { id: 3, name: 'Guest House' },
+    { id: 4, name: 'Homestay' },
+    { id: 5, name: 'Hotel Bintang 1' },
+    { id: 6, name: 'Hotel Bintang 2' },
+    { id: 7, name: 'Hotel Bintang 3' },
+    { id: 8, name: 'Hotel Bintang 4' },
+    { id: 9, name: 'Hotel Bintang 5' },
+    { id: 10, name: 'Hotel Non-Bintang' },
+    { id: 11, name: 'Vila' },
   ];
 
   const handleShowEditModal = () => {
@@ -131,31 +173,55 @@ const Akomodasi = () => {
   };
 
   const handleEditChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
+
     setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
+        ...prevData,
+        [name]: type === "file" ? files[0] : value,
     }));
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedEditId || !editData) return;
 
-    axios
-      .put(`http://localhost:5000/api/accomodations/edit/${selectedEditId}`, editData)
-      .then((response) => {
-        const updatedDest = response.data;
-        setAccomodations((prevAccomodations) =>
-          prevAccomodations.map((dest) =>
-            dest.id === updatedDest.id ? updatedDest : dest
-          )
-        );
-        handleCloseEditModal();
-      })
-      .catch((error) => {
+    const formData = new FormData();
+    
+    if (editData.gambar_akomodasi instanceof File) {
+      formData.append("gambar_akomodasi", editData.gambar_akomodasi);
+    }
+
+    Object.keys(editData).forEach((key) => {
+      if (key !== "gambar_akomodasi") { 
+        formData.append(key, editData[key] || ""); 
+      }
+    });
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/accomodations/edit/${selectedEditId}`, 
+        formData, 
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      
+      const updateAccomodation = response.data;
+
+      setAccomodations((prevAccomodations) =>
+        prevAccomodations.map((accomodation) =>
+          accomodation.id === updateAccomodation.id ? updateAccomodation : accomodation
+        )
+      );
+
+      handleCloseEditModal();
+      window.location.reload();
+
+    } catch (error) {
         console.error("Terjadi kesalahan saat mengedit data akomodasi:", error);
-      });
+    };
   };
 
   // Modal Hapus
@@ -193,7 +259,7 @@ const Akomodasi = () => {
       .delete(`http://localhost:5000/api/accomodations/delete/${selectedDeleteId}`)
       .then(() => {
         setAccomodations((prevAccomodations) =>
-          prevAccomodations.filter(dest => dest.id !== selectedDeleteId)
+          prevAccomodations.filter(accomodation => accomodation.id !== selectedDeleteId)
         );
         handleCloseDeleteModal();
         window.location.reload();
@@ -217,7 +283,7 @@ const Akomodasi = () => {
             <Card.Body>
               <p>
               Tabel ini menyajikan akomodasi secara terstruktur 
-              untuk membantu admin dalam proses manajemen dan pemantauan ekonomi kreatif. 
+              untuk membantu admin dalam proses manajemen dan pemantauan data akomodasi. 
               Informasi seperti nama, lokasi, status operasional, 
               dan review ditampilkan secara ringkas dan dapat 
               disortir untuk memudahkan analisis.
@@ -244,6 +310,7 @@ const Akomodasi = () => {
         onHide={handleCloseDetailModal}
         backdrop="static"
         keyboard={false}
+        size="lg"
       >
         <Modal.Header closeButton>
           <Modal.Title>Detail Akomodasi</Modal.Title>
@@ -278,14 +345,36 @@ const Akomodasi = () => {
           ) : (
             <div>
               <p>
+                <strong>Tanggal Rilis:</strong>{" "}
+                {dataDetail.createdAt
+                  ? new Date(dataDetail.createdAt).toLocaleString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
+                  : ""}
+              </p>
+              <p>
                 <strong>Kategori Akomodasi:</strong> {dataDetail.kategori_akomodasi}
               </p>
               <p>
                 <strong>Nama Akomodasi:</strong> {dataDetail.nama_akomodasi}
               </p>
-              <p>
-                <strong>Deskripsi:</strong> {dataDetail.deskripsi_akomodasi}
-              </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Deskripsi:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="deskripsi_akomodasi"
+                  name="deskripsi_akomodasi"
+                  value={dataDetail.deskripsi_akomodasi}
+                  rows={5}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
               <p>
                 <strong>Alamat:</strong> {dataDetail.alamat}
               </p>
@@ -295,14 +384,51 @@ const Akomodasi = () => {
               <p>
                 <strong>Harga Kamar:</strong> {dataDetail.harga_kamar}
               </p>
-              <p>
-                <strong>Fasilitas:</strong> {dataDetail.fasilitas}
-              </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Fasilitas:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="fasilitas"
+                  name="fasilitas"
+                  value={dataDetail.fasilitas}
+                  rows={2}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
               <p>
                 <strong>No Whatsapp:</strong> {dataDetail.no_whatsapp}
               </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Link Gmaps:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="link_gmaps"
+                  name="link_gmaps"
+                  value={dataDetail.link_gmaps}
+                  rows={2}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
               <p>
-                <strong>Link Gmaps:</strong> {dataDetail.link_gmaps}
+                <strong>Instagram URL:</strong> {dataDetail.link_instagram}
+              </p>
+              <p>
+                <strong>Youtube URL:</strong> {dataDetail.link_youtube}
+              </p>
+              <p>
+                <strong>Facebook URL:</strong> {dataDetail.link_facebook}
+              </p>
+              <p>
+                <strong>Gambar Akomodasi:</strong> 
+                {dataDetail?.gambar_akomodasi && (
+                  <img
+                    src={dataDetail.gambar_akomodasi}
+                    alt="Gambar Akomodasi"
+                    style={{ width: "100%", objectFit: "cover", marginTop: "20px"}}
+                  />
+                )}
               </p>
             </div>
           )}
@@ -341,9 +467,9 @@ const Akomodasi = () => {
                   onChange={handleEditSelectChange}
                 >
                   <option value="">-- Pilih ID --</option>
-                  {accomodations.map((dest) => (
-                    <option key={dest.id} value={dest.id}>
-                      {dest.kategori_akomodasi} | {dest.nama_akomodasi}
+                  {accomodations.map((accomodation) => (
+                    <option key={accomodation.id} value={accomodation.id}>
+                      {accomodation.kategori_akomodasi} | {accomodation.nama_akomodasi}
                     </option>
                   ))}
                 </Form.Control>
@@ -391,7 +517,7 @@ const Akomodasi = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Deskripsi</Form.Label>
                     <Form.Control
@@ -400,11 +526,11 @@ const Akomodasi = () => {
                       value={editData.deskripsi_akomodasi || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={5}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Alamat</Form.Label>
                     <Form.Control
@@ -413,11 +539,11 @@ const Akomodasi = () => {
                       value={editData.alamat || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={2}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>Jumlah Kamar Tersedia</Form.Label>
                     <Form.Control
@@ -429,7 +555,7 @@ const Akomodasi = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>Harga Kamar</Form.Label>
                     <Form.Control
@@ -441,40 +567,84 @@ const Akomodasi = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="4">
                   <Form.Group>
                     <Form.Label>No Whatsapp</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      name="fasilitas"
-                      value={editData.fasilitas || ""}
-                      onChange={handleEditChange}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md="6">
-                  <Form.Group>
-                    <Form.Label>Fasilitas</Form.Label>
                     <Form.Control
                       type="text"
                       name="no_whatsapp"
                       value={editData.no_whatsapp || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
+                  <Form.Group>
+                    <Form.Label>Fasilitas</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      name="fasilitas"
+                      value={editData.fasilitas || ""}
+                      onChange={handleEditChange}
+                      required
+                      rows={2}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Link Gmaps</Form.Label>
                     <Form.Control
-                      type="text"
+                      as="textarea"
                       name="link_gmaps"
                       value={editData.link_gmaps || ""}
                       onChange={handleEditChange}
                       required
+                      rows={2}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="12">
+                  <Form.Group>
+                    <Form.Label>Upload Gambar Akomodasi</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="gambar_akomodasi"
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Instagram URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_instagram"
+                      value={editData.link_instagram || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Youtube URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_youtube"
+                      value={editData.link_youtube || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="4">
+                  <Form.Group>
+                    <Form.Label>Facebook URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_facebook"
+                      value={editData.link_facebook || ""}
+                      onChange={handleEditChange}
                     />
                   </Form.Group>
                 </Col>

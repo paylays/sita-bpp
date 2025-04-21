@@ -41,6 +41,32 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      gambar_kreasilokal: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      link_instagram: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      link_youtube: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      link_facebook: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      createdAt: {
+        type: Sequelize.TIMESTAMP,
+        allowNull: true,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+      updateAt: {
+        type: Sequelize.TIMESTAMP,
+        allowNull: true,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
     });
   },
 

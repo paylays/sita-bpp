@@ -42,10 +42,30 @@ const Destination = sequelize.define('Destination', {
     kategori_destinasi: {
         type: DataTypes.STRING,
         allowNull: true
-    }
+    },
+    gambar_destinasi: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    link_whatsapp: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    link_instagram: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    link_youtube: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    link_facebook: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
 }, {
     tableName: 'destinations',
-    timestamps: false
+    timestamps: true
 });
 
 module.exports = Destination;

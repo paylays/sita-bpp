@@ -70,7 +70,7 @@ class Slider extends Component {
               >
                 {/* MAIN IMAGE */}
                 <img
-                  src={require('./../../images/main-slider/slider-beach.jpg')} // Use JPG image
+                  src={require('./../../images/main-slider/slider-new.jpg')} // Use JPG image
                   alt=""
                   data-bgposition="center center"
                   data-bgfit="cover"

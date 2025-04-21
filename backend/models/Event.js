@@ -36,7 +36,7 @@ const Event = sequelize.define('Event', {
       type: DataTypes.TIME,
       allowNull: true,
     },
-    gambar_acara: {  // ➜ Tambahkan kolom gambar_acara
+    gambar_acara: { 
       type: DataTypes.STRING,
       allowNull: true,
     },

@@ -3,62 +3,34 @@ import { NavLink } from 'react-router-dom';
 import Header from '../Common/Header';
 import Banner from '../Elements/Banner';
 import Footer from '../Common/Footer';
+import axios from 'axios';
 
-const events = [
-  {
-    image: require('./../../images/blog/blog-grid/pic4.jpg'),
-    title: 'We’ll nail your next project, because nobody wants...',
-    author: 'John',
-    date: '5',
-    month: 'SEP',
-    comments: '5 Comment'
-  },
-  {
-    image: require('./../../images/blog/blog-grid/pic1.jpg'),
-    title: 'Helping you and your house become better acquainted.',
-    author: 'John',
-    date: '25',
-    month: 'SEP',
-    comments: '5 Comment'
-  },
-  {
-    image: require('./../../images/blog/blog-grid/pic2.jpg'),
-    title: 'Creating quality urban lifestyles, building...',
-    author: 'John',
-    date: '26',
-    month: 'SEP',
-    comments: '5 Comment'
-  },
-  {
-    image: require('./../../images/blog/blog-grid/pic3.jpg'),
-    title: 'When it comes to your house, don’t mess...',
-    author: 'John',
-    date: '16',
-    month: 'SEP',
-    comments: '3 Comment'
-  },
-  {
-    image: require('./../../images/blog/blog-grid/pic4.jpg'),
-    title: 'Don’t get framed by the competition, trust our...',
-    author: 'John',
-    date: '18',
-    month: 'SEP',
-    comments: '5 Comment'
-  },
-  {
-    image: require('./../../images/blog/blog-grid/pic5.jpg'),
-    title: 'We’re the construction kings, building up great...',
-    author: 'John',
-    date: '15',
-    month: 'SEP',
-    comments: '2 Comment'
-  }
-]
-
-var bnrimg = require('./../../images/banner/7.jpg');
+var bnrimg = require('./../../images/banner/banner-acara.jpg');
 
 class Event extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      events: [],
+    };
+  }
+
+  componentDidMount() {
+    this.fetchEvents();
+  }
+
+  fetchEvents = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/events');
+      this.setState({ events: response.data });
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+  
   render() {
+    const { events } = this.state;
+
     return (
       <>
         <Header />
@@ -75,29 +47,35 @@ class Event extends Component {
                 {events.map((item, index) => (
                   <div className="masonry-item  col-lg-4 col-md-6 col-sm-12" key={index}>
                     <div className="blog-post blog-grid date-style-2">
-                      <div className="sx-post-media sx-img-effect img-reflection">
-                        <NavLink to={"/acara-detail"}><img src={item.image} alt="" /></NavLink>
+                      <div className="sx-post-media sx-img-effect img-reflection" >
+                        <NavLink to={`/acara-detail/${item.id}`}><img src={`http://localhost:5000/uploads/${item.gambar_acara}`} alt={item.nama_acara} style={{ width: "100", height: "300px", objectFit: "cover" }} /></NavLink>
                       </div>
                       <div className="sx-post-info p-t30">
                         <div className="sx-post-meta ">
                           <ul>
-                            <li className="post-date"><strong>{item.date}</strong> <span>{item.month}</span> </li>
-                            <li className="post-author"><NavLink to={"/acara-detail"}>By <span>{item.author}</span></NavLink> </li>
-                            <li className="post-comment"> <NavLink to={"/acara-detail"}>{item.comments}</NavLink> </li>
+                          <li className="post-date">
+                            <strong>{new Date(item.tanggal_mulai_acara).getDate()}</strong>
+                            <span>{new Date(item.tanggal_mulai_acara).toLocaleString('id-ID', { month: 'long' })}</span>
+                          </li>
+                            <li className="post-author"><NavLink to={`/acara-detail/${item.id}`}>By <span>Admin</span></NavLink> </li>
+                            <li className="post-comment"> <NavLink to={`/acara-detail/${item.id}`}>Kota Balikpapan</NavLink> </li>
+                            <span className={`badge shaped-pill text-white bg-${item.status_acara === "upcoming" ? "warning" : "success"}`}>
+                              {item.status_acara === "upcoming" ? "Akan Datang" : "Sudah Terlaksana"}
+                            </span>
                           </ul>
                         </div>
                         <div className="sx-post-title ">
-                          <h4 className="post-title"><NavLink to={"/acara-detail"}>{item.title}</NavLink></h4>
+                          <h4 className="post-title"><NavLink to={`/acara-detail/${item.id}`}>{item.judul_acara}</NavLink></h4>
                         </div>
                         <div className="sx-post-readmore">
-                          <NavLink to={"/acara-detail"} title="READ MORE" rel="bookmark" className="site-button-link">View More</NavLink>
+                          <NavLink to={`/acara-detail/${item.id}`} title="READ MORE" rel="bookmark" className="site-button-link">Lihat Selengkapnya</NavLink>
                         </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>    
-              <ul className="pagination m-t30 m-b0">
+              {/* <ul className="pagination m-t30 m-b0">
                 <li><NavLink to={"#"}>«</NavLink></li>
                 <li className="active"><NavLink to={"#"}>1</NavLink></li>
                 <li><NavLink to={"#"}>2</NavLink></li>
@@ -105,7 +83,7 @@ class Event extends Component {
                 <li><NavLink to={"#"}>4</NavLink></li>
                 <li><NavLink to={"#"}>5</NavLink></li>
                 <li><NavLink to={"#"}>»</NavLink></li>
-              </ul>
+              </ul> */}
             </div>        
           </div>
         </div>

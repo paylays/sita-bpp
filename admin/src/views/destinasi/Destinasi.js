@@ -31,24 +31,54 @@ const Destinasi = () => {
       })
       .catch((error) => {
         console.error("Gagal mengambil data destinasi:", error);
-        setDestinations([]); // Pastikan tidak null untuk menghindari error
+        setDestinations([]);
       });
   }, []);
+
+  const categoryColors = {
+    "Wisata Alam": "rgba(34, 139, 34, 0.5)",
+    "Wisata Buatan": "rgba(255, 140, 0, 0.5)",
+    "Wisata Sejarah": "rgba(139, 69, 19, 0.5)", 
+    "Wisata Religi": "rgba(128, 0, 128, 0.5)", 
+    "Wisata Bahari": "rgba(30, 144, 255, 0.5)",
+    "Wisata Belanja": "rgba(255, 20, 147, 0.5)", 
+    "Wisata Kuliner": "rgba(220, 20, 60, 0.5)", 
+    "Wisata Olahraga": "rgba(255, 215, 0, 0.5)"
+  }; 
   
   const tableData = destinations.map((item) => [
-    item.kategori_destinasi,
+    new Date(item.createdAt).toLocaleString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, 
+    }),
+    `<span class="badge shaped-pill" 
+      style="background-color: ${categoryColors[item.kategori_destinasi] || 'gray'}; color: white;">
+      ${item.kategori_destinasi}
+    </span>`,
     item.nama_destinasi,
-    item.deskripsi_destinasi,
-    item.alamat,
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.deskripsi_destinasi}</div>`,
+    `<div style="white-space: normal; width: 400px;">${item.alamat}</div>`,
     item.jam_operasional,
     item.harga_tiket,
-    item.fasilitas,
-    item.aktivitas,
-    item.link_gmaps,
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.fasilitas}</div>`,
+    `<div style="white-space: normal; width: 600px; max-height: 200px; overflow: auto;">${item.aktivitas}</div>`,
+    `<div style="white-space: normal; width: 300px; max-height: 200px; overflow: auto;">${item.link_gmaps}</div>`,
+    item.gambar_destinasi 
+    ? `<img src="http://localhost:5000/uploads/${item.gambar_destinasi}" alt="Gambar Destinasi" width="100"/>`
+    : "Tidak ada gambar",
+    item.link_whatsapp,
+    item.link_instagram,
+    item.link_youtube,
+    item.link_facebook,
   ]);
 
   const DataTableOptions = {
     columns: [
+      { title: "Tanggal Rilis" },
       { title: "Kategori Destinasi" },
       { title: "Nama Destinasi" },
       { title: "Deskripsi" },
@@ -58,6 +88,11 @@ const Destinasi = () => {
       { title: "Fasilitas" },
       { title: "Aktivitas" },
       { title: "Link Gmaps" },
+      { title: "Gambar Destinasi" },
+      { title: "No Whatsapp" },
+      { title: "Instagram URL" },
+      { title: "Youtube URL" },
+      { title: "Facebook URL" },
     ],
     data: tableData,
   };
@@ -82,7 +117,13 @@ const Destinasi = () => {
     axios
       .get(`http://localhost:5000/api/destinations/${selectedDetailId}`)
       .then((response) => {
-        setDataDetail(response.data);
+        const eventData = response.data
+        setDataDetail({
+          ...eventData,
+          gambar_destinasi: eventData.gambar_destinasi
+            ? `http://localhost:5000/uploads/${eventData.gambar_destinasi}`
+            : null,
+        });
       })
       .catch((error) => {
         console.error("Terjadi kesalahan saat mengambil detail destinasi:", error);
@@ -128,32 +169,55 @@ const Destinasi = () => {
   };
 
   const handleEditChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
+
     setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
+        ...prevData,
+        [name]: type === "file" ? files[0] : value,
     }));
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedEditId || !editData) return;
 
-    axios
-      .put(`http://localhost:5000/api/destinations/edit/${selectedEditId}`, editData)
-      .then((response) => {
-        // Update data destinasi pada state jika diperlukan
-        const updatedDest = response.data;
-        setDestinations((prevDestinations) =>
-          prevDestinations.map((dest) =>
-            dest.id === updatedDest.id ? updatedDest : dest
-          )
-        );
-        handleCloseEditModal();
-      })
-      .catch((error) => {
-        console.error("Terjadi kesalahan saat mengedit destinasi:", error);
-      });
+    const formData = new FormData();
+
+    if (editData.gambar_destinasi instanceof File) {
+      formData.append("gambar_destinasi", editData.gambar_destinasi);
+    }
+
+    Object.keys(editData).forEach((key) => {
+      if (key !== "gambar_destinasi") { 
+        formData.append(key, editData[key] || ""); 
+      }
+    });
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/destinations/edit/${selectedEditId}`, 
+        formData, 
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const updateDestination = response.data;
+
+      setDestinations((prevDestinations) => 
+        prevDestinations.map((destination) => 
+          destination.id === updateDestination.id ? updateDestination : destination
+        )
+      );
+
+      handleCloseEditModal();
+      window.location.reload();
+
+    } catch (error) {
+      console.error("Terjadi kesalahan saat mengedit data destinasi:", error);
+    }
   };
 
 
@@ -242,6 +306,7 @@ const Destinasi = () => {
         onHide={handleCloseDetailModal}
         backdrop="static"
         keyboard={false}
+        size="lg"
       >
         <Modal.Header closeButton>
           <Modal.Title>Detail Destinasi</Modal.Title>
@@ -276,14 +341,36 @@ const Destinasi = () => {
           ) : (
             <div>
               <p>
+                <strong>Tanggal Rilis:</strong>{" "}
+                {dataDetail.createdAt
+                  ? new Date(dataDetail.createdAt).toLocaleString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
+                  : ""}
+              </p>
+              <p>
                 <strong>Kategori Destinasi:</strong> {dataDetail.kategori_destinasi}
               </p>
               <p>
                 <strong>Nama Destinasi:</strong> {dataDetail.nama_destinasi}
               </p>
-              <p>
-                <strong>Deskripsi:</strong> {dataDetail.deskripsi_destinasi}
-              </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Deskripsi:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="deskripsi_destinasi"
+                  name="deskripsi_destinasi"
+                  value={dataDetail.deskripsi_destinasi}
+                  rows={5}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
               <p>
                 <strong>Alamat:</strong> {dataDetail.alamat}
               </p>
@@ -293,14 +380,63 @@ const Destinasi = () => {
               <p>
                 <strong>Harga Tiket:</strong> {dataDetail.harga_tiket}
               </p>
+              <Col md="12" className="mb-3">
+                <p><strong>Fasilitas:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="fasilitas"
+                  name="fasilitas"
+                  value={dataDetail.fasilitas}
+                  rows={2}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
+              <Col md="12" className="mb-3">
+                <p><strong>Aktivitas:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="aktivitas"
+                  name="aktivitas"
+                  value={dataDetail.aktivitas}
+                  rows={2}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
+              <Col md="12" className="mb-3">
+                <p><strong>Link Gmaps:</strong></p>
+                <Form.Control
+                  as="textarea"
+                  id="link_gmaps"
+                  name="link_gmaps"
+                  value={dataDetail.link_gmaps}
+                  rows={5}
+                  style={{ resize: "vertical" }}
+                  readOnly
+                />
+              </Col>
               <p>
-                <strong>Fasilitas:</strong> {dataDetail.fasilitas}
+                <strong>No Whatsapp:</strong> {dataDetail.link_whatsapp}
               </p>
               <p>
-                <strong>Aktivitas:</strong> {dataDetail.aktivitas}
+                <strong>Instagram URL:</strong> {dataDetail.link_instagram}
               </p>
               <p>
-                <strong>Link Gmaps:</strong> {dataDetail.link_gmaps}
+                <strong>Youtube URL:</strong> {dataDetail.link_youtube}
+              </p>
+              <p>
+                <strong>Facebook URL:</strong> {dataDetail.link_facebook}
+              </p>
+              <p>
+                <strong>Gambar Destinasi:</strong> 
+                {dataDetail?.gambar_destinasi && (
+                  <img
+                    src={dataDetail.gambar_destinasi}
+                    alt="Gambar Destinasi"
+                    style={{ width: "100%", objectFit: "cover", marginTop: "20px"}}
+                  />
+                )}
               </p>
             </div>
           )}
@@ -389,7 +525,7 @@ const Destinasi = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Deskripsi Destinasi</Form.Label>
                     <Form.Control
@@ -398,11 +534,11 @@ const Destinasi = () => {
                       value={editData.deskripsi_destinasi || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={5}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Alamat</Form.Label>
                     <Form.Control
@@ -411,7 +547,7 @@ const Destinasi = () => {
                       value={editData.alamat || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={2}
                     />
                   </Form.Group>
                 </Col>
@@ -439,7 +575,7 @@ const Destinasi = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Fasilitas</Form.Label>
                     <Form.Control
@@ -448,11 +584,11 @@ const Destinasi = () => {
                       value={editData.fasilitas || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={2}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Aktivitas</Form.Label>
                     <Form.Control
@@ -461,19 +597,74 @@ const Destinasi = () => {
                       value={editData.aktivitas || ""}
                       onChange={handleEditChange}
                       required
-                      rows={1}
+                      rows={2}
                     />
                   </Form.Group>
                 </Col>
-                <Col md="6">
+                <Col md="12">
                   <Form.Group>
                     <Form.Label>Link Gmaps</Form.Label>
                     <Form.Control
-                      type="text"
+                      as="textarea"
                       name="link_gmaps"
-                      value={editData.link_gmaps || ""}
+                      value={editData.link_gmaps}
                       onChange={handleEditChange}
                       required
+                      rows={2}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="12">
+                  <Form.Group>
+                    <Form.Label>Upload Gambar Destinasi</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="gambar_destinasi"
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="3">
+                  <Form.Group>
+                    <Form.Label>No Whatsapp</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_whatsapp"
+                      value={editData.link_whatsapp || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="3">
+                  <Form.Group>
+                    <Form.Label>Instagram URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_instagram"
+                      value={editData.link_instagram || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="3">
+                  <Form.Group>
+                    <Form.Label>Youtube URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_youtube"
+                      value={editData.link_youtube || ""}
+                      onChange={handleEditChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md="3">
+                  <Form.Group>
+                    <Form.Label>Facebook URL</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="link_facebook"
+                      value={editData.link_facebook || ""}
+                      onChange={handleEditChange}
                     />
                   </Form.Group>
                 </Col>

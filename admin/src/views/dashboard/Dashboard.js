@@ -1,4 +1,4 @@
-import React, { useEffect, memo, Fragment } from "react";
+import React, { useEffect, memo, Fragment, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 
 import Circularprogressbar from "../../components/circularprogressbar.js";
@@ -19,6 +19,8 @@ import { useSelector } from "react-redux";
 
 // Import selectors & action from setting store
 import * as SettingSelector from "../../store/setting/selectors";
+
+import axios from "axios";
 
 
 
@@ -53,6 +55,7 @@ const Dashboard = memo((props) => {
   const variableColors = getVariableColor();
 
   const colors = [variableColors.primary, variableColors.info];
+
   useEffect(() => {
     return () => colors;
   });
@@ -70,6 +73,34 @@ const Dashboard = memo((props) => {
       offset: 10,
     });
   });
+
+  const [destinations, setDestinations] = useState(0);
+  const [localCreations, setLocalCreations] = useState(0);
+  const [accommodations, setAccommodations] = useState(0);
+  const [events, setEvents] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [destRes, localRes, accRes, eventRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/destinations"),
+          axios.get("http://localhost:5000/api/localcreations"),
+          axios.get("http://localhost:5000/api/accomodations"),
+          axios.get("http://localhost:5000/api/events"),
+        ]);
+
+        setDestinations(destRes.data.length);
+        setLocalCreations(localRes.data.length);
+        setAccommodations(accRes.data.length);
+        setEvents(eventRes.data.length);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Fragment>
       <Row>
@@ -123,9 +154,9 @@ const Dashboard = memo((props) => {
                         </svg>
                       </Circularprogressbar>
                       <div className="progress-detail">
-                        <p className="mb-2">Total Sales</p>
+                        <p className="mb-2">Jumlah Destinasi</p>
                         <h4 className="counter">
-                          $<CountUp start={120} end={560} duration={3} />K
+                          <CountUp start={0} end={destinations} duration={3} />
                         </h4>
                       </div>
                     </div>
@@ -158,9 +189,9 @@ const Dashboard = memo((props) => {
                         </svg>
                       </Circularprogressbar>
                       <div className="progress-detail">
-                        <p className="mb-2">Total Profit</p>
+                        <p className="mb-2">Jumlah Kreasi Lokal</p>
                         <h4 className="counter">
-                          $<CountUp start={20} end={158} duration={3} />K
+                          <CountUp start={0} end={localCreations} duration={3} />
                         </h4>
                       </div>
                     </div>
@@ -188,9 +219,9 @@ const Dashboard = memo((props) => {
                         </svg>
                       </Circularprogressbar>
                       <div className="progress-detail">
-                        <p className="mb-2">Total Cost</p>
+                        <p className="mb-2">Jumlah Akomodasi</p>
                         <h4 className="counter">
-                          $<CountUp start={120} end={378} duration={3} />K
+                          <CountUp start={0} end={accommodations} duration={3} />
                         </h4>
                       </div>
                     </div>
@@ -223,51 +254,14 @@ const Dashboard = memo((props) => {
                         </svg>
                       </Circularprogressbar>
                       <div className="progress-detail">
-                        <p className="mb-2">Revenue</p>
+                        <p className="mb-2">Jumlah Acara</p>
                         <h4 className="counter">
-                          $<CountUp start={212} end={742} duration={3} />K
+                          <CountUp start={0} end={events} duration={3} />
                         </h4>
                       </div>
                     </div>
                   </div>
                 </SwiperSlide>
-                <SwiperSlide className=" card card-slide">
-                  <div className="card-body">
-                    <div className="progress-widget">
-                      <Circularprogressbar
-                        stroke={variableColors.primary}
-                        width="60px"
-                        height="60px"
-                        trailstroke="#ddd"
-                        strokewidth="4px"
-                        Linecap="rounded"
-                        style={{ width: 60, height: 60 }}
-                        value={50}
-                        id="circle-progress-05"
-                      >
-                        <svg
-                          className=""
-                          width="24px"
-                          height="24px"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M5,17.59L15.59,7H9V5H19V15H17V8.41L6.41,19L5,17.59Z"
-                          />
-                        </svg>
-                      </Circularprogressbar>
-                      <div className="progress-detail">
-                        <p className="mb-2">Net Income</p>
-                        <h4 className="counter">
-                          $<CountUp start={35} end={150} duration={3} />K
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
-                </SwiperSlide>
-                <div className="swiper-button swiper-button-next"></div>
-                <div className="swiper-button swiper-button-prev"></div>
               </Swiper>
             </div>
           </Row>

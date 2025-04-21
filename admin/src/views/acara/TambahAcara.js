@@ -59,7 +59,6 @@ const TambahAcara = () => {
 
       console.log("Event berhasil ditambahkan:", response.data);
 
-      // Reset form dan validasi
       setFormData({
         penyelenggara_acara: '',
         judul_acara: '',

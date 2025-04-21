@@ -21,29 +21,29 @@ const Navigation = () => {
     );
   }, []);
 
+  const handleNavClick = (event, path) => {
+    event.preventDefault(); // Mencegah navigasi default dari React Router
+    setTimeout(() => {
+      window.location.href = path; // Pindah halaman
+    }, 100); // Tunggu 100ms agar perubahan terjadi sebelum reload
+  };
+
   return (
     <ul className="nav navbar-nav">
       <li className={location.pathname === '/' ? 'active' : ''}>
-        <NavLink to={"/"}>Home</NavLink>
+        <NavLink to="/" onClick={(e) => handleNavClick(e, "/")}>Home</NavLink>
       </li>
       <li className={location.pathname === '/destinasi' ? 'active' : ''}>
-        <NavLink to={"/destinasi"}>Destinasi</NavLink>
+        <NavLink to="/destinasi" onClick={(e) => handleNavClick(e, "/destinasi")}>Destinasi</NavLink>
       </li>
       <li className={location.pathname === '/kreasi-lokal' ? 'active' : ''}>
-        <NavLink to={"/kreasi-lokal"}>Kreasi Lokal</NavLink>
+        <NavLink to="/kreasi-lokal" onClick={(e) => handleNavClick(e, "/kreasi-lokal")}>Kreasi Lokal</NavLink>
       </li>
       <li className={location.pathname === '/akomodasi' ? 'active' : ''}>
-        <NavLink to={"/akomodasi"}>Akomodasi</NavLink>
+        <NavLink to="/akomodasi" onClick={(e) => handleNavClick(e, "/akomodasi")}>Akomodasi</NavLink>
       </li>
       <li className={location.pathname === '/acara' ? 'active' : ''}>
-        <NavLink to={"/acara"}>Acara</NavLink>
-      </li>
-      <li>
-        <NavLink to={""}>Tentang Kami</NavLink>
-        <ul className="sub-menu">
-            <li><NavLink to={"/tentang-kami"}>Profil</NavLink></li>
-            <li><NavLink to={""}>Visi Misi</NavLink></li>
-        </ul>
+        <NavLink to="/acara" onClick={(e) => handleNavClick(e, "/acara")}>Acara</NavLink>
       </li>
     </ul>
   );
